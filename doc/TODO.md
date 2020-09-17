@@ -3,6 +3,7 @@
 ## Possible problems
 - [ ] Can camera be used on background?
 - [ ] Can camera be activate on unlock or keypresses?
+- [ ] Does YOLO (or another similar library) support images with different sizes?
 
 ## Open questions
 - [ ] Do inference on the phone or use APIs to backend server?
