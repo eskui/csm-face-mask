@@ -15,7 +15,7 @@
 - [ ] Geolocation
 
 ## Data Science
-- [ ] Collect images with and without masks IN PROGRESS: ESA
+- [ ] Collect images with and without masks DONE / Esa
       - normal faces without mask, lot's of datasets in this thread: https://www.researchgate.net/post/Does_anyone_know_of_a_downloadable_large_faces_dataset
       - faces with masks on downloaded from google
 - [ ] Edit the pictures downloaded from google to be suitable for model training
