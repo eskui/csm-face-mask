@@ -14,7 +14,7 @@
 - [ ] Geolocation
 
 ## Data Science
-- [ ] Collect images with and without masks
+- [ ] Collect images with and without masks IN PROGRESS: ESA
 - [ ] Face or not (use f.ex. YOLO)
 - [ ] Bounding box for face (use f.ex. YOLO)
 - [ ] Crop faces from bounding boxes
