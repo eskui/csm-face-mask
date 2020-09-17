@@ -4,13 +4,14 @@
 - [ ] Can camera be used on background?
 - [ ] Can camera be activate on unlock or keypresses?
 
+## Open questions
+- [ ] Do inference on the phone or use APIs to backend server?
+- [ ] Develop on home computers or somewhere else?
+
 ## Frontend
 - [ ] Web app that can handle image uploads and call APIs with images
 - [ ] Mobile frontend
 - [ ] Geolocation
-
-## Backend
-- [ ] APIs for Data Science stuff
 
 ## Data Science
 - [ ] Collect images with and without masks
@@ -18,9 +19,6 @@
 - [ ] Bounding box for face (use f.ex. YOLO)
 - [ ] Crop faces from bounding boxes
 - [ ] Train a CNN for detecting if mask is on or not
-
-## Development
-- [ ] Develop on home computers or somewhere else?
 
 ## Required by university
 - [ ] Book time for 30/9/2020 meeting with Jukka
