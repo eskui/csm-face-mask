@@ -10,7 +10,7 @@
 - [ ] Develop on home computers or somewhere else?
 
 ## Frontend
-- [ ] Build an Android app that works on background and displays a 'Hello World!' notification when a key is pressed
+- [x] Build an Android app that works on background and displays a 'Hello World!' notification when a key is pressed
 - [ ] Web app that can handle image uploads and call APIs with images
 - [ ] Mobile frontend
 - [ ] Geolocation
