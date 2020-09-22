@@ -5,20 +5,22 @@
 - [ ] Can camera be activate on unlock or keypresses?
 - [ ] Does YOLO (or another similar library) support images with different sizes?
 
+## Generic stuff
+- [ ] Move use cases to human-centred manner as advised in design thinking?
+
 ## Open questions
 - [ ] Do inference on the phone or use APIs to backend server?
 - [ ] Develop on home computers or somewhere else?
 
 ## Frontend
-- [x] Build an Android app that works on background and displays a 'Hello World!' notification when a key is pressed
+- [x] Build an Android app that works on background and displays a 'Hello World!' notification when the phone is unlocked
+- [ ] Build an Android app that works on background and takes an image with the front camera when the phoneis unlocked
 - [ ] Web app that can handle image uploads and call APIs with images
 - [ ] Mobile frontend
 - [ ] Geolocation
 
 ## Data Science
-- [ ] Collect images with and without masks DONE / Esa
-      - normal faces without mask, lot's of datasets in this thread: https://www.researchgate.net/post/Does_anyone_know_of_a_downloadable_large_faces_dataset
-      - faces with masks on downloaded from google
+- [x] Collect images with and without masks
 - [ ] Edit the pictures downloaded from google to be suitable for model training
 - [ ] Face or not (use f.ex. YOLO)
 - [ ] Bounding box for face (use f.ex. YOLO)
@@ -27,7 +29,7 @@
 
 ## Required by university
 - [ ] Book time for 30/9/2020 meeting with Jukka
-- [ ] Preparation for 14/10/2020 meeting
+- [ ] Preparation for 7/10/2020 meeting
 - [ ] Book time for 28/10/2020 meeting with Jukka
 - [ ] Preparation for 14/10/2020 meeting
 - [ ] Preparation for 25/11/2020 demo session

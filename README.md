@@ -2,11 +2,19 @@
 
 Project for Computer Science Project course by University of Helsinki, Autumn 2020.
 
-## Forgot Your Face Mask App
+### Forgot Your Face Mask App
 
-TBD
+#### Android app
+- [Android app skeleton](AndroidApp/)
 
-Links:
+- Currently triggering on unlock, but the camera only opens when the app is open
+
+#### Mask detector
+
+- [Mask/No-mask dataset from Kaggle](https://www.kaggle.com/alexandralorenzo/maskdetection)
+
+#### Links
 
 - [TODO](doc/TODO.md)
+- [Use Cases](doc/Use_Cases.md)
 
