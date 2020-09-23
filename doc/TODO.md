@@ -20,6 +20,7 @@
 - [ ] Geolocation
 
 ## Data Science
+- [x] YOLO installation instructions for Anaconda
 - [x] Collect images with and without masks
 - [ ] Edit the pictures downloaded from google to be suitable for model training
 - [ ] Face or not (use f.ex. YOLO)
