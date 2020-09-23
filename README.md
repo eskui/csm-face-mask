@@ -5,6 +5,7 @@ Project for Computer Science Project course by University of Helsinki, Autumn 20
 ### Forgot Your Face Mask App
 
 #### Android app
+
 - [Android app skeleton](AndroidApp/)
 
 - Currently triggering on unlock, but the camera only opens when the app is open
@@ -22,6 +23,10 @@ git clone https://github.com/ultralytics/yolov3
 cd yolov3
 python detect.py
 ````
+
+#### Meetings with Jukka
+
+- Wed 30/9/2020 9:30
 
 #### Links
 

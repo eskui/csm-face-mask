@@ -29,7 +29,7 @@
 - [ ] Train a CNN for detecting if mask is on or not
 
 ## Required by university
-- [ ] Book time for 30/9/2020 meeting with Jukka
+- [x] Book time for 30/9/2020 meeting with Jukka
 - [ ] Preparation for 7/10/2020 meeting
 - [ ] Book time for 28/10/2020 meeting with Jukka
 - [ ] Preparation for 14/10/2020 meeting
