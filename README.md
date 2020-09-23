@@ -13,6 +13,15 @@ Project for Computer Science Project course by University of Helsinki, Autumn 20
 
 - [Mask/No-mask dataset from Kaggle](https://www.kaggle.com/alexandralorenzo/maskdetection)
 
+##### YOLOv3 Installation with Anaconda3
+
+```
+conda create --name face-mask --file yolo-env.txt.
+git clone https://github.com/ultralytics/yolov3
+cd yolov3
+python detect.py
+````
+
 #### Links
 
 - [TODO](doc/TODO.md)
