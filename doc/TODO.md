@@ -36,7 +36,7 @@
 - [ ] Preparation for 25/11/2020 demo session
 
 ## Learning diary updates
-- [ ] Update for 23/9/2020
+- [x] Update for 23/9/2020
 - [ ] Update for 30/9/2020
 - [ ] Update for 7/10/2020
 - [ ] Update for 14/10/2020
