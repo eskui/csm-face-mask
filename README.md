@@ -17,7 +17,7 @@ Project for Computer Science Project course by University of Helsinki, Autumn 20
 ##### YOLOv3 Installation with Anaconda3
 
 ```
-conda create --name face-mask --file yolo-env.txt
+conda env create --file yolo-env.yml
 conda activate face-mask
 git clone https://github.com/ultralytics/yolov3
 cd yolov3
