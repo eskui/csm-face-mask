@@ -11,6 +11,7 @@
 ## Open questions
 - [ ] Do inference on the phone or use APIs to backend server?
 - [ ] Develop on home computers or somewhere else?
+- [ ] Should we detect from video or from static picture? If video, then YOLO, if not, then we might consider dropping it.
 
 ## Frontend
 - [x] Build an Android app that works on background and displays a 'Hello World!' notification when the phone is unlocked
