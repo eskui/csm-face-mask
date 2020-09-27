@@ -1,4 +1,4 @@
-package com.example.csproject;
+package com.example.atry;
 
 import org.junit.Test;
 
