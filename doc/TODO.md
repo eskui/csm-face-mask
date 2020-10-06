@@ -1,33 +1,36 @@
 # TODO
 
 ## Possible problems
-- [ ] Can camera be used on background?
-- [ ] Can camera be activate on unlock or keypresses?
-- [ ] Does YOLO (or another similar library) support images with different sizes?
+- [x] Can camera be used on background? - Yes, it can!
+- [x] Can camera be activate on unlock or keypresses? - Yes, it can!
+- [x] Does YOLO (or another similar library) support images with different sizes? - We can scale the images.
 
 ## Generic stuff
 - [ ] Move use cases to human-centred manner as advised in design thinking?
 
 ## Open questions
-- [ ] Do inference on the phone or use APIs to backend server?
-- [ ] Develop on home computers or somewhere else?
-- [ ] Should we detect from video or from static picture? If video, then YOLO, if not, then we might consider dropping it.
+- [x] Do inference on the phone or use APIs to backend server? - We'll try to do this on the phone.
+- [x] Develop on home computers or somewhere else? - Seems like everyone will have their own development environment.
+- [x] Should we detect from video or from static picture? - We'll use a static picture to start with.
 
-## Frontend
-- [x] Build an Android app that works on background and displays a 'Hello World!' notification when the phone is unlocked
-- [ ] Build an Android app that works on background and takes an image with the front camera when the phoneis unlocked
-- [ ] Web app that can handle image uploads and call APIs with images
-- [ ] Mobile frontend
+## Mobile frontend
+- [ ] How-to instructions for running the current App in Android Studio
+- [x] App that works on background and displays a 'Hello World!' notification when the phone is unlocked
+- [x] App that works on background and takes an image with the front camera when the phoneis unlocked
+- [ ] App that takes a photo and detects digits 0-9 from it (MNIST)
+- [ ] App that takes a photo and detects digits 0-9 when the phone is unlocked (Extension to previous item, could be done at the same time?)
+- [ ] App that takes a photo and detects if a face is present or not
+- [ ] App that takes a photo and detects bounding box for the face
+- [ ] App that takes a photo and crops the face from the image using the bounding box information
+- [ ] App that detects from a face, cropped from a photo, if it has mask or not
 - [ ] Geolocation
 
 ## Data Science
 - [x] YOLO installation instructions for Anaconda
 - [x] Collect images with and without masks
-- [ ] Edit the pictures downloaded from google to be suitable for model training
-- [ ] Face or not (use f.ex. YOLO)
-- [ ] Bounding box for face (use f.ex. YOLO)
-- [ ] Crop faces from bounding boxes
-- [ ] Train a CNN for detecting if mask is on or not
+- [ ] Train a "face or not" model
+- [ ] Train a model that can get bounding box for face (this can possible be combined with the "face or not" model)
+- [ ] Train a model for detecting if mask is on or not
 
 ## Required by university
 - [x] Book time for 30/9/2020 meeting with Jukka
