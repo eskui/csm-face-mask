@@ -14,6 +14,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.net.ConnectivityManager;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -24,7 +25,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -104,46 +107,80 @@ public class ForegroundService extends Service {
             SystemClock.sleep(1000);
 
             Camera.getCameraInfo(camIdx, cameraInfo);
+            if ( cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT  ) {
+                try {
+                    camera = Camera.open(camIdx);
+                } catch (RuntimeException e) {
+                    System.out.println("Camera not available: " + camIdx);
+                    camera = null;
+                    //e.printStackTrace();
+                }
+                try {
+                    if (null == camera) {
+                        System.out.println("Could not get camera instance");
+                    } else {
+                        System.out.println("Got the camera, creating the dummy surface texture");
+                        SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(camIdx);
+                        try {
+                            camera.setPreviewTexture(dummySurfaceTextureF);
+                            camera.setPreviewTexture(new SurfaceTexture(camIdx));
+                            camera.startPreview();
+                        } catch (Exception e) {
+                            System.out.println("Could not set the surface preview texture");
+                            e.printStackTrace();
+                        }
+                        camera.takePicture(null, null, new Camera.PictureCallback() {
 
-            try {
-                camera = Camera.open(camIdx);
-            } catch (RuntimeException e) {
-                System.out.println("Camera not available: " + camIdx);
-                camera = null;
-                //e.printStackTrace();
-            }
-            try {
-                if (null == camera) {
-                    System.out.println("Could not get camera instance");
-                } else {
-                    System.out.println("Got the camera, creating the dummy surface texture");
-                    //SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(0);
-                    try {
-                        //camera.setPreviewTexture(dummySurfaceTextureF);
-                        camera.setPreviewTexture(new SurfaceTexture(0));
-                        camera.startPreview();
-                    } catch (Exception e) {
-                        System.out.println("Could not set the surface preview texture");
-                        e.printStackTrace();
-                    }
-                    camera.takePicture(null, null, new Camera.PictureCallback() {
-
-                        @Override
-                        public void onPictureTaken(byte[] data, Camera camera) {
+                            @Override
+                            public void onPictureTaken(byte[] data, Camera camera) {
 
                                 System.out.println("image saved");
-
-                            camera.release();
-                        }
-                    });
+                                File pictureFile = getOutputMediaFile();
+                                if (pictureFile == null) {
+                                    return;
+                                }
+                                try {
+                                    FileOutputStream fos = new FileOutputStream(pictureFile);
+                                    fos.write(data);
+                                    fos.close();
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                camera.release();
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    camera.release();
                 }
-            } catch (Exception e) {
-                camera.release();
             }
-
 
         }
     }
+
+    private static File getOutputMediaFile() {
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "MaskApp");
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("MaskApp", "failed to create directory");
+                return null;
+            }
+        }
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new Date());
+        File mediaFile;
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                + "IMG_" + timeStamp + ".jpg");
+
+        return mediaFile;
+    }
+
 
     @Override
     public void onDestroy() {
