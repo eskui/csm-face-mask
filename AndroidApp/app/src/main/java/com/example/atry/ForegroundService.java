@@ -1,6 +1,5 @@
 package com.example.atry;
 
-import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -16,30 +15,28 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.net.ConnectivityManager;
 import android.os.Build;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
-import android.widget.Toast;
 
+import org.pytorch.IValue;
 import org.pytorch.Module;
 import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class ForegroundService extends Service {
-    public static final String CHANNEL_ID = "ForegroundServiceChannel";
+    private static final String CHANNEL_ID = "ForegroundServiceChannel";
     private static final String TAG = "MyBroadcastReceiver";
+    Context context = this;
 
     @Override
     public void onCreate() {
@@ -48,8 +45,10 @@ public class ForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand() called.");
         String input = intent.getStringExtra("inputExtra");
         createNotificationChannel();
+
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
@@ -57,136 +56,153 @@ public class ForegroundService extends Service {
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Foreground Service")
                 .setContentText(input)
-
                 .setContentIntent(pendingIntent)
                 .build();
 
         startForeground(1, notification);
-       /* final Handler handler = new Handler();
-        final Handler handler2 = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                takePhoto();
-                handler2.postDelayed(new Runnable() {
-                    public void run() {
-                        takePhoto();
-                    }
-                }, 10000);
-            }
-        }, 10000);*/
 
-        //do heavy work on a background thread
-
+        // create a broadcast receiver that takes a photo when called
         BroadcastReceiver br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Action: " + intent.getAction() + "\n");
-                sb.append("URI: " + intent.toUri(Intent.URI_INTENT_SCHEME).toString() + "\n");
-                String log = sb.toString();
-                Log.d(TAG, log);
-                Log.d(TAG, "leeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeel");
-                //Toast.makeText(context, log, Toast.LENGTH_LONG).show();
-                takePhoto();
+                Log.d(TAG,"Going to take a photo.");
+                try {
+                    takePhoto();
+                } catch (Exception e) {
+                    Log.e(TAG,"Taking a photo failed.");
+                    e.printStackTrace();
+                }
             }
         };
 
+        // what kind of Intents are we interested in?
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
+
+        // register our broadcastreceiver to get the messages from the intents
+        // that we are interested in
         this.registerReceiver(br, filter);
 
-        //stopSelf();
-
+        // TODO: what is this return code?
         return START_NOT_STICKY;
     }
 
-    private void takePhoto() {
+    private void takePhoto() throws Exception {
 
         System.out.println("Preparing to take photo");
         Camera camera = null;
 
-        int cameraCount = 0;
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        cameraCount = Camera.getNumberOfCameras();
-        for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
+        for (int camIdx = 0; camIdx < Camera.getNumberOfCameras(); camIdx++) {
+
+            // TODO: why sleep here?
             SystemClock.sleep(1000);
 
             Camera.getCameraInfo(camIdx, cameraInfo);
-            if ( cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT  ) {
+
+            // is the camera facing front?
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 try {
                     camera = Camera.open(camIdx);
                 } catch (RuntimeException e) {
-                    System.out.println("Camera not available: " + camIdx);
-                    camera = null;
-                    //e.printStackTrace();
+                    Log.e(TAG,"Could not get the camera!");
+                    Log.e(TAG, e.toString());
+                    throw e;
                 }
+
+                Log.d(TAG, "Got the camera, creating the dummy surface texture.");
+
+                // get a surface texture to prevent the user from seeing the image
+                SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(camIdx);
                 try {
-                    if (null == camera) {
-                        System.out.println("Could not get camera instance");
-                    } else {
-                        System.out.println("Got the camera, creating the dummy surface texture");
-                        SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(camIdx);
+                    camera.setPreviewTexture(dummySurfaceTextureF);
+                    camera.setPreviewTexture(new SurfaceTexture(camIdx));
+                    camera.startPreview();
+                } catch (Exception e) {
+                    Log.e(TAG,"Could not set the surface preview texture.");
+                    Log.e(TAG, e.toString());
+                    throw e;
+                }
+
+                camera.takePicture(null, null, new Camera.PictureCallback() {
+
+                    @Override
+                    public void onPictureTaken(byte[] data, Camera camera) {
+
+                        Log.d(TAG, "Starting to handle new picture.");
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        camera.release();
+
+                        //Module model = Module.load("file:///android_asset/model.pt");
                         try {
-                            camera.setPreviewTexture(dummySurfaceTextureF);
-                            camera.setPreviewTexture(new SurfaceTexture(camIdx));
-                            camera.startPreview();
+                            Module model = Module.load(assetFilePath(context, "model.pt"));
+                            final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap,
+                                    TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB);
+
+                            final Tensor outputTensor = model.forward(IValue.from(inputTensor)).toTensor();
+                            final float[] scores = outputTensor.getDataAsFloatArray();
+                            float maxScore = -Float.MAX_VALUE;
+                            int maxScoreIdx = -1;
+                            for (int i = 0; i < scores.length; i++) {
+                                if (scores[i] > maxScore) {
+                                    maxScore = scores[i];
+                                    maxScoreIdx = i;
+                                }
+                            }
+
+                            String className = ImageNetClasses.IMAGENET_CLASSES[maxScoreIdx];
+                            Log.d(TAG, "Picture taken!");
+                            Log.d(TAG,"Class is: " + className);
+                            notifyClassificationResult(className);
                         } catch (Exception e) {
-                            System.out.println("Could not set the surface preview texture");
                             e.printStackTrace();
                         }
-                        camera.takePicture(null, null, new Camera.PictureCallback() {
-
-                            @Override
-                            public void onPictureTaken(byte[] data, Camera camera) {
-
-                                System.out.println("image saved");
-                                File pictureFile = getOutputMediaFile();
-                                if (pictureFile == null) {
-                                    return;
-                                }
-                                try {
-                                    FileOutputStream fos = new FileOutputStream(pictureFile);
-                                    fos.write(data);
-                                    fos.close();
-                                } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                camera.release();
-                            }
-                        });
                     }
-                } catch (Exception e) {
-                    camera.release();
-                }
+                });
             }
-
         }
     }
 
-    private static File getOutputMediaFile() {
-        File mediaStorageDir = new File(
-                Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                "MaskApp");
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d("MaskApp", "failed to create directory");
-                return null;
-            }
+    private void notifyClassificationResult(String className) {
+        Log.d(TAG,"Going to send a notifcation.");
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        Notification n  = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            n = new Notification.Builder(this)
+                    .setContentTitle("Photo taken!")
+                    .setContentText("The detected class is: " + className)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentIntent(pendingIntent)
+                    .setChannelId(CHANNEL_ID)
+                    //.setAutoCancel(true)
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .build();
+
+            Log.d(TAG,"Really, really going to send the notification.");
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager.notify(42, n);
+
+            Log.d(TAG,"Notification sent!");
         }
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-                .format(new Date());
-        File mediaFile;
-        mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                + "IMG_" + timeStamp + ".jpg");
-        System.out.println(mediaFile);
-        return mediaFile;
     }
 
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Foreground Service Channel",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+
+            channel.enableVibration(true);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
     @Override
     public void onDestroy() {
@@ -199,16 +215,22 @@ public class ForegroundService extends Service {
         return null;
     }
 
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel serviceChannel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Foreground Service Channel",
-                    NotificationManager.IMPORTANCE_DEFAULT
-            );
+    private static String assetFilePath(Context context, String assetName) throws IOException {
+        File file = new File(context.getFilesDir(), assetName);
+        if (file.exists() && file.length() > 0) {
+            return file.getAbsolutePath();
+        }
 
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(serviceChannel);
+        try (InputStream is = context.getAssets().open(assetName)) {
+            try (OutputStream os = new FileOutputStream(file)) {
+                byte[] buffer = new byte[4 * 1024];
+                int read;
+                while ((read = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                }
+                os.flush();
+            }
+            return file.getAbsolutePath();
         }
     }
 }
