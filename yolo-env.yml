@@ -1,4 +1,4 @@
-name: face-mask-test2
+name: face-mask
 channels:
     - defaults
 dependencies:
