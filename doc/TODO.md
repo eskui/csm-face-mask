@@ -14,11 +14,10 @@
 - [x] Should we detect from video or from static picture? - We'll use a static picture to start with.
 
 ## Mobile frontend
-- [ ] How-to instructions for running the current App in Android Studio
 - [x] App that works on background and displays a 'Hello World!' notification when the phone is unlocked
 - [x] App that works on background and takes an image with the front camera when the phoneis unlocked
-- [ ] App that takes a photo and detects digits 0-9 from it (MNIST)
-- [ ] App that takes a photo and detects digits 0-9 when the phone is unlocked (Extension to previous item, could be done at the same time?)
+- [x] App that takes a photo and detects images using a model pretrained on ImageNet
+- [x] App that takes a photo and detects images using a model pretrained on Imagenet when the phone is unlocked 
 - [ ] App that takes a photo and detects if a face is present or not
 - [ ] App that takes a photo and detects bounding box for the face
 - [ ] App that takes a photo and crops the face from the image using the bounding box information
@@ -34,15 +33,15 @@
 
 ## Required by university
 - [x] Book time for 30/9/2020 meeting with Jukka
-- [ ] Preparation for 7/10/2020 meeting
+- [x] Preparation for 7/10/2020 meeting
 - [ ] Book time for 28/10/2020 meeting with Jukka
 - [ ] Preparation for 14/10/2020 meeting
 - [ ] Preparation for 25/11/2020 demo session
 
 ## Learning diary updates
 - [x] Update for 23/9/2020
-- [ ] Update for 30/9/2020
-- [ ] Update for 7/10/2020
+- [x] Update for 30/9/2020
+- [x] Update for 7/10/2020
 - [ ] Update for 14/10/2020
 - [ ] Update for 21/10/2020
 - [ ] Update for 28/10/2020
