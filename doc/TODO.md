@@ -42,7 +42,7 @@
 - [x] Update for 23/9/2020
 - [x] Update for 30/9/2020
 - [x] Update for 7/10/2020
-- [ ] Update for 14/10/2020
+- [x] Update for 14/10/2020
 - [ ] Update for 21/10/2020
 - [ ] Update for 28/10/2020
 - [ ] Update for 4/11/2020
