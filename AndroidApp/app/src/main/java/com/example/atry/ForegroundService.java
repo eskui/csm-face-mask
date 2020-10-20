@@ -128,7 +128,6 @@ public class ForegroundService extends Service {
                 }
 
                 Log.d(TAG, "Got the camera, creating the dummy surface texture.");
-
                 // get a surface texture to prevent the user from seeing the image
                 SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(camIdx);
                 try {
@@ -149,32 +148,18 @@ public class ForegroundService extends Service {
                         Log.d(TAG, "Starting to handle new picture.");
                         Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                         bitmap= rotateImage(bitmap,270);
+                        Bitmap resized = Bitmap.createScaledBitmap(bitmap, 500, 500, true);
                         camera.release();
 
-                        File pictureFile = getOutputMediaFile();
-                        if (pictureFile == null) {
-                            return;
-                        }
-                        try {
-                            FileOutputStream fos = new FileOutputStream(pictureFile);
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                            fos.close();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        //Module model = Module.load("file:///android_asset/model.pt");
                         try {
                             Module model = Module.load(assetFilePath(context, "mask_model.pt"));
-                            final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap,
+                            final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(resized,
                                     TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB);
 
                             final Tensor outputTensor = model.forward(IValue.from(inputTensor)).toTensor();
                             final float[] scores = outputTensor.getDataAsFloatArray();
                             String class_;
-                            System.out.println(scores);
+                            System.out.println(scores[0]+" / "+scores[1]);
                             if(scores[1]>scores[0]) {
                                 class_ = "no Mask";
                             }
@@ -182,11 +167,23 @@ public class ForegroundService extends Service {
                                 class_ = "Mask";
                             }
 
+                            File pictureFile = getOutputMediaFile(scores);
+                            if (pictureFile == null) {
+                                return;
+                            }
+                            try {
+                                FileOutputStream fos = new FileOutputStream(pictureFile);
+                                resized.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                                fos.close();
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
-                            //String className = (String) read().get(maxScoreIdx);
                             Log.d(TAG, "Picture taken!");
                             Log.d(TAG, class_);
-                            notifyClassificationResult(""+class_);
+                            notifyClassificationResult(""+class_,scores);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -196,7 +193,7 @@ public class ForegroundService extends Service {
         }
     }
 
-    private static File getOutputMediaFile() {
+    private static File getOutputMediaFile(float[] scores) {
         File mediaStorageDir = new File(
                 Environment
                         .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
@@ -207,17 +204,17 @@ public class ForegroundService extends Service {
                 return null;
             }
         }
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-                .format(new Date());
+        String annotation=scores[0] + "-" + scores[1]+".jpg";
+        System.out.println(annotation);
+
         File mediaFile;
         mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                + "IMG_" + timeStamp + ".jpg");
+                + annotation);
 
         return mediaFile;
     }
 
-    private void notifyClassificationResult(String className) {
+    private void notifyClassificationResult(String className,float[] scores) {
         Log.d(TAG,"Going to send a notifcation.");
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
@@ -225,7 +222,8 @@ public class ForegroundService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             n = new Notification.Builder(this)
                     .setContentTitle("Photo taken!")
-                    .setContentText("The detected class is: " + className)
+                    //.setContentText("The detected class is: " + className)
+                    .setContentText("scares: " + scores[0]+" / "+scores[1])
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentIntent(pendingIntent)
                     .setChannelId(CHANNEL_ID)
