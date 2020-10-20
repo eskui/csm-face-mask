@@ -30,6 +30,9 @@
 - [ ] Train a "face or not" model
 - [ ] Train a model that can get bounding box for face (this can possible be combined with the "face or not" model)
 - [ ] Train a model for detecting if mask is on or not
+- [ ] Evaluate augmentation options and specify parameters
+- [ ] Scrape more data from the web
+- [ ] Test hyperparameters like learning rate and momentum
 
 ## Required by university
 - [x] Book time for 30/9/2020 meeting with Jukka
