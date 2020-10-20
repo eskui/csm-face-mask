@@ -15,6 +15,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.net.ConnectivityManager;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -28,10 +29,17 @@ import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import static java.util.Collections.max;
 
 public class ForegroundService extends Service {
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
@@ -129,6 +137,19 @@ public class ForegroundService extends Service {
 
                     @Override
                     public void onPictureTaken(byte[] data, Camera camera) {
+                        File pictureFile = getOutputMediaFile();
+                        if (pictureFile == null) {
+                            return;
+                        }
+                        try {
+                            FileOutputStream fos = new FileOutputStream(pictureFile);
+                            fos.write(data);
+                            fos.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
 
                         Log.d(TAG, "Starting to handle new picture.");
                         Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
@@ -136,25 +157,26 @@ public class ForegroundService extends Service {
 
                         //Module model = Module.load("file:///android_asset/model.pt");
                         try {
-                            Module model = Module.load(assetFilePath(context, "model.pt"));
+                            Module model = Module.load(assetFilePath(context, "mask_model.pt"));
                             final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap,
                                     TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB);
 
                             final Tensor outputTensor = model.forward(IValue.from(inputTensor)).toTensor();
                             final float[] scores = outputTensor.getDataAsFloatArray();
-                            float maxScore = -Float.MAX_VALUE;
-                            int maxScoreIdx = -1;
-                            for (int i = 0; i < scores.length; i++) {
-                                if (scores[i] > maxScore) {
-                                    maxScore = scores[i];
-                                    maxScoreIdx = i;
-                                }
+                            String class_;
+                            System.out.println(scores);
+                            if(scores[1]>scores[0]) {
+                                class_ = "no Mask";
+                            }
+                            else{
+                                class_ = "Mask";
                             }
 
-                            String className = ImageNetClasses.IMAGENET_CLASSES[maxScoreIdx];
+
+                            //String className = (String) read().get(maxScoreIdx);
                             Log.d(TAG, "Picture taken!");
-                            Log.d(TAG,"Class is: " + className);
-                            notifyClassificationResult(className);
+                            Log.d(TAG, class_);
+                            notifyClassificationResult(""+class_);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -162,6 +184,27 @@ public class ForegroundService extends Service {
                 });
             }
         }
+    }
+
+    private static File getOutputMediaFile() {
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "MaskApp");
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("MaskApp", "failed to create directory");
+                return null;
+            }
+        }
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new Date());
+        File mediaFile;
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                + "IMG_" + timeStamp + ".jpg");
+
+        return mediaFile;
     }
 
     private void notifyClassificationResult(String className) {
