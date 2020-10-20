@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.net.ConnectivityManager;
@@ -96,6 +97,13 @@ public class ForegroundService extends Service {
         return START_NOT_STICKY;
     }
 
+    public static Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
+    }
+
     private void takePhoto() throws Exception {
 
         System.out.println("Preparing to take photo");
@@ -137,23 +145,25 @@ public class ForegroundService extends Service {
 
                     @Override
                     public void onPictureTaken(byte[] data, Camera camera) {
+
+                        Log.d(TAG, "Starting to handle new picture.");
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        bitmap= rotateImage(bitmap,270);
+                        camera.release();
+
                         File pictureFile = getOutputMediaFile();
                         if (pictureFile == null) {
                             return;
                         }
                         try {
                             FileOutputStream fos = new FileOutputStream(pictureFile);
-                            fos.write(data);
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
                             fos.close();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
-                        Log.d(TAG, "Starting to handle new picture.");
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        camera.release();
 
                         //Module model = Module.load("file:///android_asset/model.pt");
                         try {
