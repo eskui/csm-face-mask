@@ -27,6 +27,7 @@ python detect.py
 #### Meetings with Jukka
 
 - Wed 30/9/2020 9:30
+- Wed 28/10/2020 9:45
 
 #### Links
 
