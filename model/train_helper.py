@@ -155,3 +155,6 @@ def save_mobile_model(model, fname):
 
 def save_model(model, fname):
     torch.save(model, fname)
+
+def load_model(fname, **args):
+    return torch.load(fname, **args)
