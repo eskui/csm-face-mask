@@ -147,6 +147,7 @@ def get_model(dataloaders, n_epochs=30):
     return model, criterion, optimizer, scheduler
 
 def save_mobile_model(model, fname):
+    model.to('cpu')
     model.eval()
     example = torch.rand(1, 3, 224, 224)
     traced_script_module = torch.jit.trace(model, example)
