@@ -149,7 +149,7 @@ def get_model(dataloaders, n_epochs=30):
 def save_mobile_model(model, fname):
     model.eval()
     example = torch.rand(1, 3, 224, 224)
-    traced_script_module = torch.jit.trace(model_ft, example)
+    traced_script_module = torch.jit.trace(model, example)
     traced_script_module.save(fname)
 
 def save_model(model, fname):
