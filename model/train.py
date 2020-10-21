@@ -2,7 +2,7 @@
 
 import train_helper
 
-n_epochs = 1
+n_epochs = 30
 
 dataloaders, class_names = train_helper.load_data('../../data')
 model, criterion, optimizer, scheduler = train_helper.get_model(dataloaders, n_epochs)
