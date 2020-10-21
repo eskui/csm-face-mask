@@ -12,7 +12,7 @@ import copy
 from torch.optim import lr_scheduler
 from torchvision import datasets, models, transforms
 
-def load_data(batch_size=1):
+def load_data(data_dir='data', batch_size=1):
     # data normalization
     data_transforms = {
         'train': transforms.Compose([
@@ -29,7 +29,6 @@ def load_data(batch_size=1):
         ]),
     }
 
-    data_dir = 'data'
     image_datasets = {}
     dataloaders = {}
 
