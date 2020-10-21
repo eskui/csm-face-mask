@@ -17,7 +17,7 @@
 - [x] App that works on background and displays a 'Hello World!' notification when the phone is unlocked
 - [x] App that works on background and takes an image with the front camera when the phoneis unlocked
 - [x] App that takes a photo and detects images using a model pretrained on ImageNet
-- [x] App that takes a photo and detects images using a model pretrained on Imagenet when the phone is unlocked 
+- [x] App that takes a photo and detects images using a model pretrained on Imagenet when the phone is unlocked
 - [ ] App that takes a photo and detects if a face is present or not
 - [ ] App that takes a photo and detects bounding box for the face
 - [ ] App that takes a photo and crops the face from the image using the bounding box information
@@ -31,7 +31,8 @@
 - [ ] Train a model that can get bounding box for face (this can possible be combined with the "face or not" model)
 - [ ] Train a model for detecting if mask is on or not
 - [ ] Evaluate augmentation options and specify parameters
-- [ ] Scrape more data from the web
+- [x] Scrape more data from the web (Done, Esa has over 800 pictures)
+- [ ] Incorporate scraped training data
 - [ ] Test hyperparameters like learning rate and momentum
 
 ## Required by university

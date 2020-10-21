@@ -1,5 +1,6 @@
 To copy data from local to puhti (replace your USERNAME with your CSC username):
-'scp -r data/ USERNAME@puhti.csc.fi:/scratch/project_2003564'
+1.'scp -r data/ USERNAME@puhti.csc.fi:/scratch/project_2003564'
+2.remember to grant privileges: 'chmod g+rwx data'
 
 The command copies data files to the project scratch folder where they can be used for training of the model in Puhti.
 Deleted automatically after 90 days if not used. Please remove any old data there might be located before uploading new.
