@@ -91,8 +91,8 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, n_epochs=25
             if phase == 'train':
                 scheduler.step()
 
-            epoch_loss = running_loss / dataset_sizes[phase]
-            epoch_acc = running_corrects.double() / dataset_sizes[phase]
+            epoch_loss = running_loss / len(dataloaders[phase])
+            epoch_acc = running_corrects.double() / len(dataloaders[phase])
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
