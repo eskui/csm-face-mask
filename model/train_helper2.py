@@ -117,6 +117,7 @@ def train_model(model, criterion, optimizer, scheduler, n_epochs=25, data_dir='d
                 if phase == 'train':
                     loss.backward()
                     optimizer.step()
+                    scheduler.step()
                     optimizer.zero_grad()
 
                 # statistics
@@ -140,12 +141,9 @@ def train_model(model, criterion, optimizer, scheduler, n_epochs=25, data_dir='d
 def get_model(dataloaders, n_epochs=30):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+    # For some reason pretrained models fail here.
     # load pretrained resnet model
-    model = models.resnet18(pretrained=True)
-
-    # freeze all parameters
-    for param in model.parameters():
-        param.requires_grad = False
+    model = models.resnet18(pretrained=False)
 
     # replace output layer
     # we have one output (probability of mask or not)
