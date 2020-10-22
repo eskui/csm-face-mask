@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import train_helper2 as train_helper2 as train_helper
+import train_helper2 as train_helper
 
 n_epochs = 30
 data_dir = './data'
