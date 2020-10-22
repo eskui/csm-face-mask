@@ -68,7 +68,7 @@ def load_data(data_dir='data', batch_size=1):
     for phase in ['train', 'val', 'test', 'own']:
         path = os.path.join(data_dir, phase)
 
-        if not path:
+        if not (os.path.isdir(f'{path}/mask') and len(os.listdir(f'{path}/mask')) > 1):
             continue
 
         image_datasets[phase] = datasets.ImageFolder(path, data_transforms[phase])
@@ -166,7 +166,7 @@ def get_model(dataloaders, n_epochs=30):
     # One Cycle Policy scheduler
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer,
-        max_lr=0.01,
+        max_lr=0.1,
         base_momentum=0.5,
         max_momentum=0.95,
         steps_per_epoch=len(dataloaders['train']),
