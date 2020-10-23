@@ -10,10 +10,11 @@ Deleted automatically after 90 days if not used. Please remove any old data ther
 
 1.Log into Puhti
 2.Run the following command in Puhti to activate an interactive session (increase time if needed):
-  'sinteractive --account project_2003564 --time 1:00:00 --mem 8000 --gpu 4'
+  'sinteractive --account project_2003564 --time 1:00:00 --mem 16000 --gpu 2'
 3.Navigate to the project directory: 'cd /scratch/project_2003564'
 4.Load pytorch module: 'module load pytorch/1.6'
 5.Run the trainer: 'python3 model_trainer.py'
 
 
 #### Copy the model from Puhti to local #######
+1.'scp USERNAME@puhti.csc.fi:/scratch/project_2003564/model.pt model.pt'
