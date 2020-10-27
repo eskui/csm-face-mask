@@ -13,14 +13,16 @@ from torch.optim import lr_scheduler
 from torchvision import datasets, models, transforms
 
 def load_data(data_dir='data', batch_size=1):
-    # data normalization
     data_transforms = {
         'train': transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ]),
         'val': transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ]),
@@ -30,12 +32,11 @@ def load_data(data_dir='data', batch_size=1):
         ]),
     }
 
-    image_datasets = {}
     dataloaders = {}
+    image_datasets = {}
 
-    for phase in ['train', 'val', 'test']:
-        image_datasets[phase] = datasets.ImageFolder(
-            os.path.join(data_dir, phase), data_transforms[phase])
+    for phase in ['train', 'val']:
+        image_datasets[phase] = datasets.ImageFolder(os.path.join(data_dir, phase), data_transforms[phase])
 
         dataloaders[phase] = torch.utils.data.DataLoader(
             image_datasets[phase], batch_size=batch_size, shuffle=True, num_workers=4)
@@ -49,7 +50,6 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, n_epochs=25
 
     since = time.time()
 
-    best_model_weights = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
     for epoch in range(n_epochs):
@@ -57,14 +57,14 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, n_epochs=25
         print('-' * 10)
 
         # Each epoch has a training and validation phase
-        for phase in ['train', 'test']:
+        for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
             else:
                 model.eval()   # Set model to evaluate mode
 
             running_loss = 0.0
-            running_corrects = 0
+            running_corrects = 0.0
 
             # Iterate over data.
             for inputs, labels in dataloaders[phase]:
@@ -85,23 +85,18 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, n_epochs=25
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
+                        scheduler.step()
 
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
-                running_corrects += torch.sum(preds == labels.data)
-            if phase == 'train':
-                scheduler.step()
+                n_correct = torch.sum(preds == labels)
+                running_corrects += n_correct
 
-            epoch_loss = running_loss / len(dataloaders[phase])
-            epoch_acc = running_corrects.double() / len(dataloaders[phase])
+            epoch_loss = running_loss / len(dataloaders[phase].dataset)
+            epoch_acc = running_corrects / len(dataloaders[phase].dataset)
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
-
-            # deep copy the model
-            if phase == 'test' and epoch_acc > best_acc:
-                best_acc = epoch_acc
-                best_model_weights = copy.deepcopy(model.state_dict())
 
         print()
 
@@ -110,7 +105,6 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, n_epochs=25
     print('Best val Acc: {:4f}'.format(best_acc))
 
     # load best model weights
-    model.load_state_dict(best_model_weights)
     return model
 
 def get_model(dataloaders, n_epochs=30):
@@ -118,10 +112,6 @@ def get_model(dataloaders, n_epochs=30):
 
     # load pretrained resnet model
     model = models.resnet18(pretrained=True)
-
-    # freeze all parameters
-    for param in model.parameters():
-        param.requires_grad = False
 
     # replace output layer, we have two outputs
     model.fc = nn.Linear(model.fc.in_features, 2)
@@ -133,7 +123,7 @@ def get_model(dataloaders, n_epochs=30):
     criterion = nn.CrossEntropyLoss()
 
     # Learning rate and momemtum will be overriden by scheduler
-    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     # One Cycle Policy scheduler
     scheduler = torch.optim.lr_scheduler.OneCycleLR(

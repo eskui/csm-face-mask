@@ -2,9 +2,9 @@
 
 import train_helper
 
-n_epochs = 30
+n_epochs = 20
 
-dataloaders, class_names = train_helper.load_data('../../data')
+dataloaders, class_names = train_helper.load_data('../../data', batch_size=4)
 model, criterion, optimizer, scheduler = train_helper.get_model(dataloaders, n_epochs)
 model = train_helper.train_model(model, criterion, optimizer, scheduler, dataloaders, n_epochs=n_epochs)
 
