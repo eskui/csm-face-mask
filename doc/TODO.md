@@ -55,6 +55,6 @@
 - [x] Update for 14/10/2020
 - [x] Update for 21/10/2020
 - [x] Update for 28/10/2020
-- [ ] Update for 4/11/2020
+- [x] Update for 4/11/2020
 - [ ] Update for 11/11/2020
 - [ ] Update for 18/11/2020
