@@ -45,7 +45,7 @@
 - [x] Book time for 30/9/2020 meeting with Jukka
 - [x] Preparation for 7/10/2020 meeting
 - [x] Book time for 28/10/2020 meeting with Jukka
-- [ ] Preparation for 14/10/2020 meeting
+- [ ] Preparation for 11/10/2020 meeting
 - [ ] Preparation for 25/11/2020 demo session
 
 ## Learning diary updates
