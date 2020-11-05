@@ -6,8 +6,8 @@
 - [x] Does YOLO (or another similar library) support images with different sizes? - We can scale the images.
 
 ## Generic stuff
-- [ ] Move use cases to human-centred manner as advised in design thinking?
-- [ ] Minimal documentation before the end/demo
+- [R] Move use cases to human-centred manner as advised in design thinking? #I don't think we need this, Esa
+- [ ] Minimal documentation before the end/demo #Esa
 
 ## Open questions
 - [x] Do inference on the phone or use APIs to backend server? - We'll try to do this on the phone.
@@ -21,7 +21,7 @@
 - [x] App that takes a photo and detects images using a model pretrained on Imagenet when the phone is unlocked
 - [x] App that takes a photo and detects bounding box for the face (not needed)
 - [x] App that detects from picture of a face if the face has mask on or not
-- [ ] Test with another Android phone
+- [ ] Test with another Android phone #Esa
 - [ ] App that takes a photo and detects if a face is present or not
 - [ ] Add buttons to notification
 - [ ] Geolocation
@@ -37,7 +37,7 @@
 - [x] Test hyperparameters like learning rate and momentum
 - [x] Scrape more data from the web (Done, Esa has over 800 pictures)
 - [x] Incorporate scraped training data
-- [ ] Add no-face test-images
+- [x] Add no-face test-images
 - [ ] Train a "face or not" model (do we need?)
 - [ ] Detect if a mask is correctly put on #additional functionality
 
