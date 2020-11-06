@@ -67,6 +67,11 @@ def load_data(data_dir='data', batch_size=1):
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ]),
+        'own': transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ]),
     }
 
     dataloaders = {}
@@ -75,7 +80,10 @@ def load_data(data_dir='data', batch_size=1):
     for phase in ['train', 'val', 'test', 'own']:
         path = os.path.join(data_dir, phase)
 
-        if not (os.path.isdir(f'{path}/mask') and len(os.listdir(f'{path}/mask')) > 1):
+        has_mask_data = os.path.isdir(f'{path}/mask') and len(os.listdir(f'{path}/mask')) > 1
+        has_face_data = os.path.isdir(f'{path}/face') and len(os.listdir(f'{path}/face')) > 1
+
+        if not (has_mask_data or has_face_data):
             continue
 
         image_datasets[phase] = datasets.ImageFolder(path, data_transforms[phase])
