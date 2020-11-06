@@ -29,6 +29,7 @@ import org.pytorch.Module;
 import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
+import java.lang.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -45,11 +46,18 @@ import static java.util.Collections.max;
 public class ForegroundService extends Service {
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
     private static final String TAG = "MyBroadcastReceiver";
+    private Module face_model, mask_model;
     Context context = this;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        try {
+            face_model = Module.load(assetFilePath(context, "face_model_mobile.pt"));
+            mask_model = Module.load(assetFilePath(context, "mask_model_mobile.pt"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -147,27 +155,19 @@ public class ForegroundService extends Service {
 
                         Log.d(TAG, "Starting to handle new picture.");
                         Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        bitmap= rotateImage(bitmap,270);
-                        Bitmap resized = Bitmap.createScaledBitmap(bitmap, 500, 500, true);
+                        //bitmap= rotateImage(bitmap,270);
+                        Bitmap resized = Bitmap.createScaledBitmap(bitmap, 224, 224, true);
                         camera.release();
 
                         try {
-                            Module model = Module.load(assetFilePath(context, "mask_model.pt"));
                             final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(resized,
                                     TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB);
 
-                            final Tensor outputTensor = model.forward(IValue.from(inputTensor)).toTensor();
-                            final float[] scores = outputTensor.getDataAsFloatArray();
-                            String class_;
-                            System.out.println(scores[0]+" / "+scores[1]);
-                            if(scores[1]>scores[0]) {
-                                class_ = "no Mask";
-                            }
-                            else{
-                                class_ = "Mask";
-                            }
+                            final Tensor faceOutputTensor = face_model.forward(IValue.from(inputTensor)).toTensor();
+                            final float[] faceScores = faceOutputTensor.getDataAsFloatArray();
 
-                            File pictureFile = getOutputMediaFile(scores);
+                            // SAVE FILE FOR DEBUGGING PURPOSES
+                            File pictureFile = getOutputMediaFile("FACE-MODEL", faceScores);
                             if (pictureFile == null) {
                                 return;
                             }
@@ -181,9 +181,45 @@ public class ForegroundService extends Service {
                                 e.printStackTrace();
                             }
 
-                            Log.d(TAG, "Picture taken!");
-                            Log.d(TAG, class_);
-                            notifyClassificationResult(""+class_,scores);
+                            double faceScore1 = Math.exp(faceScores[0]);
+                            double faceScore2 = Math.exp(faceScores[1]);
+
+                            boolean hasFace = faceScore1 > faceScore2;
+                            if (!hasFace) {
+                                notifyClassificationResult("NO FACE", faceScores);
+                                Log.d(TAG, "NO FACE: " + faceScore1 + " / " + faceScore2);
+                                return;
+                            }
+                            Log.d(TAG, "GOT FACE: " + faceScore1 + " / " + faceScore2);
+
+                            final Tensor maskOutputTensor = mask_model.forward(IValue.from(inputTensor)).toTensor();
+                            final float[] maskScores = maskOutputTensor.getDataAsFloatArray();
+                            double maskScore1 = Math.exp(maskScores[0]);
+                            double maskScore2 = Math.exp(maskScores[1]);
+                            boolean hasMask = maskScore1  > maskScore2;
+                            if (hasMask) {
+                                Log.d(TAG, "GOT MASK: " + maskScore1 + " / " + maskScore2);
+                                notifyClassificationResult("MASK", maskScores);
+                            } else {
+                                Log.d(TAG, "NO MASK: " + maskScore1 + " / " + maskScore2);
+                                notifyClassificationResult("NO MASK", maskScores);
+                            }
+
+                            // SAVE FILE FOR DEBUGGING PURPOSES
+                            pictureFile = getOutputMediaFile("MASK-MODEL", maskScores);
+                            if (pictureFile == null) {
+                                return;
+                            }
+                            try {
+                                FileOutputStream fos = new FileOutputStream(pictureFile);
+                                resized.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                                fos.close();
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -193,7 +229,7 @@ public class ForegroundService extends Service {
         }
     }
 
-    private static File getOutputMediaFile(float[] scores) {
+    private static File getOutputMediaFile(String type, float[] scores) {
         File mediaStorageDir = new File(
                 Environment
                         .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
@@ -204,26 +240,22 @@ public class ForegroundService extends Service {
                 return null;
             }
         }
-        String annotation=scores[0] + "-" + scores[1]+".jpg";
-        System.out.println(annotation);
-
-        File mediaFile;
-        mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                + annotation);
+        String fileName = type + "-" + Math.exp(scores[0]) + "-" + Math.exp(scores[1])+".jpg";
+        File mediaFile = new File(mediaStorageDir.getPath() + File.separator + fileName);
 
         return mediaFile;
     }
 
-    private void notifyClassificationResult(String className,float[] scores) {
+    private void notifyClassificationResult(String className, float[] scores) {
         Log.d(TAG,"Going to send a notifcation.");
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        Notification n  = null;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            n = new Notification.Builder(this)
-                    .setContentTitle("Photo taken!")
+            Notification n = new Notification.Builder(this)
+                    .setContentTitle("Photo taken! Result: " + className)
                     //.setContentText("The detected class is: " + className)
-                    .setContentText("scares: " + scores[0]+" / "+scores[1])
+                    .setContentText("Result: " + className + ", scores: " + Math.exp(scores[0]) + " / " + Math.exp(scores[1]))
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentIntent(pendingIntent)
                     .setChannelId(CHANNEL_ID)
