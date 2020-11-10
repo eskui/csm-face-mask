@@ -6,7 +6,6 @@
 - [x] Does YOLO (or another similar library) support images with different sizes? - We can scale the images.
 
 ## Generic stuff
-- [R] Move use cases to human-centred manner as advised in design thinking? #I don't think we need this, Esa
 - [ ] Minimal documentation before the end/demo #Esa
 
 ## Open questions
@@ -20,6 +19,7 @@
 - [x] App that takes a photo and detects images using a model pretrained on ImageNet
 - [x] App that takes a photo and detects images using a model pretrained on Imagenet when the phone is unlocked
 - [x] App that takes a photo and detects bounding box for the face (not needed)
+- [x] App that detects from picture if there is a face in the picture or not
 - [x] App that detects from picture of a face if the face has mask on or not
 - [ ] Test with another Android phone #Esa
 - [ ] App that takes a photo and detects if a face is present or not
@@ -30,7 +30,8 @@
 - [ ] Productize Android app code
 
 ## Data Science
-- [x] YOLO installation instructions for Anaconda
+- [x] Development environment installation instructions for Anaconda
+- [x] Instructions for training the model on Puhti
 - [x] Collect images with and without masks
 - [x] Train a model for detecting if mask is on or not
 - [x] Evaluate augmentation options and specify parameters
@@ -38,8 +39,10 @@
 - [x] Scrape more data from the web (Done, Esa has over 800 pictures)
 - [x] Incorporate scraped training data
 - [x] Add no-face test-images
-- [ ] Train a "face or not" model (do we need?)
-- [ ] Detect if a mask is correctly put on #additional functionality
+- [x] Train a "face or not" model
+
+## Future enhancements
+- [ ] Detect if a mask is correctly put on
 
 ## Required by university
 - [x] Book time for 30/9/2020 meeting with Jukka
