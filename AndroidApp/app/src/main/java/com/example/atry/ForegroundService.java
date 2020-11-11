@@ -1,9 +1,11 @@
 package com.example.atry;
-
+import com.example.atry.ActionReceiver;
+import com.example.atry.Classifier;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,6 +25,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.pytorch.IValue;
 import org.pytorch.Module;
@@ -246,10 +249,26 @@ public class ForegroundService extends Service {
         return mediaFile;
     }
 
+
+
     private void notifyClassificationResult(String className, float[] scores) {
         Log.d(TAG,"Going to send a notifcation.");
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
+        Intent intentAction = new Intent(context,ActionReceiver.class);
+
+        //This is optional if you have more than one buttons and want to differentiate between two
+        intentAction.putExtra("action","action1");
+        PendingIntent pIntentlogin;
+        pIntentlogin = PendingIntent.getBroadcast(context,1,intentAction,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent intentAction2 = new Intent(context,ActionReceiver.class);
+        intentAction2.putExtra("action","action2");
+        PendingIntent pIntentlogin2;
+        pIntentlogin2 = PendingIntent.getBroadcast(context,2,intentAction2,PendingIntent.FLAG_UPDATE_CURRENT);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification n = new Notification.Builder(this)
@@ -259,6 +278,8 @@ public class ForegroundService extends Service {
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentIntent(pendingIntent)
                     .setChannelId(CHANNEL_ID)
+                    .addAction(R.drawable.ic_launcher_foreground, "ok",pIntentlogin)
+                    .addAction(R.drawable.ic_launcher_foreground, "not here",pIntentlogin2)
                     //.setAutoCancel(true)
                     .setPriority(Notification.PRIORITY_MAX)
                     .build();
