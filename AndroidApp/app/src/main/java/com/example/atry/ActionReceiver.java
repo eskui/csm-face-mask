@@ -20,11 +20,11 @@ import java.util.Locale;
 
 import static android.support.constraint.ConstraintLayoutStates.TAG;
 
-public class ActionReceiver extends BroadcastReceiver implements LocationListener{
+public class ActionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        
+
         Toast.makeText(context, "recieved", Toast.LENGTH_SHORT).show();
         String action = intent.getStringExtra("action");
         if (action.equals("action1")) {
@@ -38,40 +38,10 @@ public class ActionReceiver extends BroadcastReceiver implements LocationListene
         context.sendBroadcast(it);
     }
 
-    protected LocationManager locationManager;
-    protected LocationListener locationListener;
-    protected Context context;
-
-    String lat;
-    String provider;
-    protected String latitude,longitude;
-    protected boolean gps_enabled,network_enabled;
-
     public void doGPS() {
-        System.out.println("doing gps");
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, (LocationListener) this);
-
-    }
-    public void onLocationChanged(Location location) {
-
-       System.out.println(location.getLatitude() );
-        System.out.println(location.getLongitude() );
-    }
-    @Override
-    public void onProviderDisabled(String provider) {
-        Log.d("Latitude","disable");
+        System.out.println("gps");
     }
 
-    @Override
-    public void onProviderEnabled(String provider) {
-        Log.d("Latitude","enable");
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        Log.d("Latitude","status");
-    }
 
 }
 

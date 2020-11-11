@@ -1,6 +1,6 @@
 package com.example.atry;
 import com.example.atry.ActionReceiver;
-import com.example.atry.Classifier;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -260,12 +260,12 @@ public class ForegroundService extends Service {
         Intent intentAction = new Intent(context,ActionReceiver.class);
 
         //This is optional if you have more than one buttons and want to differentiate between two
-        intentAction.putExtra("action","action1");
+        intentAction.putExtra("action","action2");
         PendingIntent pIntentlogin;
         pIntentlogin = PendingIntent.getBroadcast(context,1,intentAction,PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent intentAction2 = new Intent(context,ActionReceiver.class);
-        intentAction2.putExtra("action","action2");
+        intentAction2.putExtra("action","action1");
         PendingIntent pIntentlogin2;
         pIntentlogin2 = PendingIntent.getBroadcast(context,2,intentAction2,PendingIntent.FLAG_UPDATE_CURRENT);
 
