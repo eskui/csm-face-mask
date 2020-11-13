@@ -190,13 +190,13 @@ public class ForegroundService extends Service {
         final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(image,
                 TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB);
 
-        final Tensor outputTensor = face_model.forward(IValue.from(inputTensor)).toTensor();
+        final Tensor outputTensor = mask_model.forward(IValue.from(inputTensor)).toTensor();
         final float[] scores = outputTensor.getDataAsFloatArray();
 
         double score1 = Math.exp(scores[0]);
         double score2 = Math.exp(scores[1]);
 
-        boolean hasMask = score1 < score2;
+        boolean hasMask = score1 > score2;
 
         if (hasMask) {
             Log.d(TAG, "DETECTED MASK, SCORES: " + score1 + " / " + score2);
@@ -258,7 +258,7 @@ public class ForegroundService extends Service {
         if (!BuildConfig.DEBUG) {
             return;
         }
-        // SAVE FILE FOR DEBUGGING PURPOSES
+
         File pictureFile = getOutputMediaFile(modelString, scores);
         if (pictureFile == null) {
             return;
