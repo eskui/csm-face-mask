@@ -115,62 +115,62 @@ public class ForegroundService extends Service {
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         for (int camIdx = 0; camIdx < Camera.getNumberOfCameras(); camIdx++) {
 
+            Camera.getCameraInfo(camIdx, cameraInfo);
+            // is the camera facing front?
+            if (cameraInfo.facing != Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                continue;
+            }
             // TODO: why sleep here?
             SystemClock.sleep(1000);
 
-            Camera.getCameraInfo(camIdx, cameraInfo);
-
-            // is the camera facing front?
-            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                try {
-                    camera = Camera.open(camIdx);
-                } catch (RuntimeException e) {
-                    Log.e(TAG,"Could not get the camera!");
-                    Log.e(TAG, e.toString());
-                    throw e;
-                }
-
-                Log.d(TAG, "Got the camera, creating the dummy surface texture.");
-                // get a surface texture to prevent the user from seeing the image
-                SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(camIdx);
-                try {
-                    camera.setPreviewTexture(dummySurfaceTextureF);
-                    camera.setPreviewTexture(new SurfaceTexture(camIdx));
-                    camera.startPreview();
-                } catch (Exception e) {
-                    Log.e(TAG,"Could not set the surface preview texture.");
-                    Log.e(TAG, e.toString());
-                    throw e;
-                }
-
-                camera.takePicture(null, null, new Camera.PictureCallback() {
-
-                    @Override
-                    public void onPictureTaken(byte[] data, Camera camera) {
-
-                        Log.d(TAG, "Starting to handle new picture.");
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        camera.release();
-
-                        try {
-                            boolean hasFace = detectFace(bitmap);
-
-                            // nothing to do, no face in the image
-                            if (!hasFace) {
-                                return;
-                            }
-
-                            boolean hasMask = detectMask(bitmap);
-                            if (!hasMask) {
-                                noitfyUserNotWearingMask();
-                            }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+            try {
+                camera = Camera.open(camIdx);
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Could not get the camera!");
+                Log.e(TAG, e.toString());
+                throw e;
             }
+
+            Log.d(TAG, "Got the camera, creating the dummy surface texture.");
+            // get a surface texture to prevent the user from seeing the image
+            SurfaceTexture dummySurfaceTextureF = new SurfaceTexture(camIdx);
+            try {
+                camera.setPreviewTexture(dummySurfaceTextureF);
+                camera.setPreviewTexture(new SurfaceTexture(camIdx));
+                camera.startPreview();
+            } catch (Exception e) {
+                Log.e(TAG, "Could not set the surface preview texture.");
+                Log.e(TAG, e.toString());
+                throw e;
+            }
+
+            camera.takePicture(null, null, new Camera.PictureCallback() {
+
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+
+                    Log.d(TAG, "Starting to handle new picture.");
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    camera.release();
+
+                    try {
+                        boolean hasFace = detectFace(bitmap);
+
+                        // nothing to do, no face in the image
+                        if (!hasFace) {
+                            return;
+                        }
+
+                        boolean hasMask = detectMask(bitmap);
+                        if (!hasMask) {
+                            noitfyUserNotWearingMask();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 
