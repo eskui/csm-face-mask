@@ -47,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[] {
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
         }, 3);
     }
     public void startService() throws IOException {

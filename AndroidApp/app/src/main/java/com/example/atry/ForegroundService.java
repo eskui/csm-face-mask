@@ -1,6 +1,10 @@
 package com.example.atry;
 import com.example.atry.ActionReceiver;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,17 +14,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -43,7 +50,7 @@ public class ForegroundService extends Service {
     private static final String TAG = "MaskApp";
     private Module face_model, mask_model;
     private Context context = this;
-
+    private FusedLocationProviderClient fusedLocationClient;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -53,6 +60,7 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     @Override
@@ -301,22 +309,30 @@ public class ForegroundService extends Service {
         notify(title, notification);
     }
 
-    private void notify(String titleText, String notificationText) {
-        Log.d(TAG,"Going to send a notification.");
+    boolean checkLocation(Location location){
+        //TODO check if locaiton is marked
+        return true;
+    }
+
+
+    void doNotification(String titleText, String notificationText, Location location){
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
 
         Intent intentAction = new Intent(context, ActionReceiver.class);
 
         //This is optional if you have more than one buttons and want to differentiate between two
-        intentAction.putExtra("action","action2");
+        intentAction.putExtra("action", "ignore");
         PendingIntent pIntentlogin;
-        pIntentlogin = PendingIntent.getBroadcast(context,1,intentAction,PendingIntent.FLAG_UPDATE_CURRENT);
+        pIntentlogin = PendingIntent.getBroadcast(context, 1, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent intentAction2 = new Intent(context, ActionReceiver.class);
-        intentAction2.putExtra("action","action1");
+        intentAction2.putExtra("action", "nothere");
+        intentAction2.putExtra("latitude", location.getLatitude());
+        intentAction2.putExtra("longitude", location.getLongitude());
         PendingIntent pIntentlogin2;
-        pIntentlogin2 = PendingIntent.getBroadcast(context,2,intentAction2,PendingIntent.FLAG_UPDATE_CURRENT);
+        pIntentlogin2 = PendingIntent.getBroadcast(context, 2, intentAction2, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification n = new Notification.Builder(this)
@@ -327,6 +343,7 @@ public class ForegroundService extends Service {
                     .setChannelId(CHANNEL_ID)
                     .addAction(R.drawable.ic_launcher_foreground, "ok",pIntentlogin)
                     .addAction(R.drawable.ic_launcher_foreground, "not here",pIntentlogin2)
+                    //.setAutoCancel(true)
                     .setPriority(Notification.PRIORITY_MAX)
                     .build();
 
@@ -338,6 +355,28 @@ public class ForegroundService extends Service {
             Log.d(TAG,"Notification sent!");
         }
     }
+
+    private void notify(final String titleText, final String notificationText) {
+        Log.d(TAG,"Going to send a notification.");
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            System.out.println("no permissions");
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            if (checkLocation(location)) {
+                                doNotification(titleText, notificationText, location);
+                            }
+                        }
+                    }
+                });
+        }
+
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
