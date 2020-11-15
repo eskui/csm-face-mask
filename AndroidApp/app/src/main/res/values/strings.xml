@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">try</string>
+    <string name="no_mask_notification_title">
+        No mask at public place!
+    </string>
+    <string name="no_mask_notification_msg">
+        You are not wearing your mask at a public place! Please, wear the mask, or choose to ignore this place.
+    </string>
 </resources>
