@@ -1,11 +1,6 @@
 package com.example.atry;
-
 import com.example.atry.ActionReceiver;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
-import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -16,20 +11,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -59,7 +51,6 @@ public class ForegroundService extends Service {
     private static final String TAG = "MyBroadcastReceiver";
     private Module face_model, mask_model;
     Context context = this;
-    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     public void onCreate() {
@@ -70,7 +61,6 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     @Override
@@ -95,11 +85,11 @@ public class ForegroundService extends Service {
         BroadcastReceiver br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, "Going to take a photo.");
+                Log.d(TAG,"Going to take a photo.");
                 try {
                     takePhoto();
                 } catch (Exception e) {
-                    Log.e(TAG, "Taking a photo failed.");
+                    Log.e(TAG,"Taking a photo failed.");
                     e.printStackTrace();
                 }
             }
@@ -143,7 +133,7 @@ public class ForegroundService extends Service {
                 try {
                     camera = Camera.open(camIdx);
                 } catch (RuntimeException e) {
-                    Log.e(TAG, "Could not get the camera!");
+                    Log.e(TAG,"Could not get the camera!");
                     Log.e(TAG, e.toString());
                     throw e;
                 }
@@ -156,7 +146,7 @@ public class ForegroundService extends Service {
                     camera.setPreviewTexture(new SurfaceTexture(camIdx));
                     camera.startPreview();
                 } catch (Exception e) {
-                    Log.e(TAG, "Could not set the surface preview texture.");
+                    Log.e(TAG,"Could not set the surface preview texture.");
                     Log.e(TAG, e.toString());
                     throw e;
                 }
@@ -209,7 +199,7 @@ public class ForegroundService extends Service {
                             final float[] maskScores = maskOutputTensor.getDataAsFloatArray();
                             double maskScore1 = Math.exp(maskScores[0]);
                             double maskScore2 = Math.exp(maskScores[1]);
-                            boolean hasMask = maskScore1 > maskScore2;
+                            boolean hasMask = maskScore1  > maskScore2;
                             if (hasMask) {
                                 Log.d(TAG, "GOT MASK: " + maskScore1 + " / " + maskScore2);
                                 notifyClassificationResult("MASK", maskScores);
@@ -253,35 +243,32 @@ public class ForegroundService extends Service {
                 return null;
             }
         }
-        String fileName = type + "-" + Math.exp(scores[0]) + "-" + Math.exp(scores[1]) + ".jpg";
+        String fileName = type + "-" + Math.exp(scores[0]) + "-" + Math.exp(scores[1])+".jpg";
         File mediaFile = new File(mediaStorageDir.getPath() + File.separator + fileName);
 
         return mediaFile;
     }
 
-    boolean checkLocation(Location location){
-        //TODO check if locaiton is marked
-        return true;
-    }
 
-    void doNotification(String className, float[] scores, Location location){
+
+    private void notifyClassificationResult(String className, float[] scores) {
+        Log.d(TAG,"Going to send a notifcation.");
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
 
-        Intent intentAction = new Intent(context, ActionReceiver.class);
+        Intent intentAction = new Intent(context,ActionReceiver.class);
 
         //This is optional if you have more than one buttons and want to differentiate between two
-        intentAction.putExtra("action", "ignore");
+        intentAction.putExtra("action","action2");
         PendingIntent pIntentlogin;
-        pIntentlogin = PendingIntent.getBroadcast(context, 1, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
+        pIntentlogin = PendingIntent.getBroadcast(context,1,intentAction,PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent intentAction2 = new Intent(context, ActionReceiver.class);
-        intentAction2.putExtra("action", "nothere");
-        intentAction2.putExtra("latitude", location.getLatitude());
-        intentAction2.putExtra("longitude", location.getLongitude());
+        Intent intentAction2 = new Intent(context,ActionReceiver.class);
+        intentAction2.putExtra("action","action1");
         PendingIntent pIntentlogin2;
-        pIntentlogin2 = PendingIntent.getBroadcast(context, 2, intentAction2, PendingIntent.FLAG_UPDATE_CURRENT);
+        pIntentlogin2 = PendingIntent.getBroadcast(context,2,intentAction2,PendingIntent.FLAG_UPDATE_CURRENT);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification n = new Notification.Builder(this)
@@ -304,32 +291,6 @@ public class ForegroundService extends Service {
 
             Log.d(TAG,"Notification sent!");
         }
-    }
-
-
-    private void notifyClassificationResult(final String className, final float[] scores) {
-        Log.d(TAG, "Going to send a notifcation.");
-
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("no permissions");
-            return;
-        }
-
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            if (checkLocation(location)) {
-                                doNotification(className, scores, location);
-                            }
-                        }
-                    }
-                });
-
-
     }
 
     private void createNotificationChannel() {

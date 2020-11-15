@@ -27,5 +27,4 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'org.pytorch:pytorch_android:1.6.0'
     implementation 'org.pytorch:pytorch_android_torchvision:1.4.0'
-    implementation "com.google.android.gms:play-services-location:15.0.1"
 }
