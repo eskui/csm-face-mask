@@ -28,4 +28,5 @@ dependencies {
     implementation 'org.pytorch:pytorch_android:1.6.0'
     implementation 'org.pytorch:pytorch_android_torchvision:1.4.0'
     implementation "com.google.android.gms:play-services-location:15.0.1"
+    implementation 'com.google.code.gson:gson:2.8.5'
 }

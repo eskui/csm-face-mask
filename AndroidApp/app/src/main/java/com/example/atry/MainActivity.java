@@ -2,6 +2,7 @@ package com.example.atry;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -22,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
         btnStartService = findViewById(R.id.buttonStartService);
         btnStopService = findViewById(R.id.buttonStopService);
@@ -54,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     }
     public void startService() throws IOException {
         Log.d(TAG, "Service starting.");
+        //SharedPreferences preferences = getSharedPreferences("locations", 0); //FOR debugging purposes to delete the locations save file
+        //preferences.edit().remove("location").commit();
         try {
             Intent serviceIntent = new Intent(this, ForegroundService.class);
             serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android.");

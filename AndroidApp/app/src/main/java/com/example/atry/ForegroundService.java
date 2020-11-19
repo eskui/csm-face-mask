@@ -1,10 +1,12 @@
 package com.example.atry;
-import com.example.atry.ActionReceiver;
+//import com.example.atry.ActionReceiver;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -14,6 +16,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,12 +34,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.pytorch.IValue;
 import org.pytorch.Module;
 import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
+import java.io.Serializable;
 import java.lang.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,15 +49,33 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ForegroundService extends Service {
+public class ForegroundService extends Service implements Serializable {
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
     private static final String TAG = "MaskApp";
     private Module face_model, mask_model;
     private Context context = this;
     private FusedLocationProviderClient fusedLocationClient;
+    public ArrayList<List<Double>> locations;
+    public ForegroundService instance;
+
+    public ForegroundService() {
+        instance = this;
+    }
+
+    public ForegroundService getInstance() {
+        return instance;
+    }
+
+    public void sayHello() {
+    }
+
+
     @Override
     public void onCreate() {
+        locations = new ArrayList<>();
         super.onCreate();
         try {
             face_model = Module.load(assetFilePath(context, "face_model_mobile.pt"));
@@ -85,11 +108,11 @@ public class ForegroundService extends Service {
         BroadcastReceiver br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d(TAG,"Going to take a photo.");
+                Log.d(TAG, "Going to take a photo.");
                 try {
                     takePhoto();
                 } catch (Exception e) {
-                    Log.e(TAG,"Taking a photo failed.");
+                    Log.e(TAG, "Taking a photo failed.");
                     e.printStackTrace();
                 }
             }
@@ -184,7 +207,7 @@ public class ForegroundService extends Service {
 
     private Bitmap prepareImage(Bitmap bitmap) {
         // front camera takes pictures sideways, so flip it
-        bitmap = rotateImage(bitmap,270);
+        bitmap = rotateImage(bitmap, 270);
 
         // resize to 224x224 for the model to use
         Bitmap resized = Bitmap.createScaledBitmap(bitmap, 224, 224, true);
@@ -282,6 +305,7 @@ public class ForegroundService extends Service {
         }
 
     }
+
     private static File getOutputMediaFile(String type, float[] scores) {
         File mediaStorageDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MaskApp");
@@ -309,20 +333,77 @@ public class ForegroundService extends Service {
         notify(title, notification);
     }
 
-    boolean checkLocation(Location location){
-        //TODO check if locaiton is marked
+    public static class ActionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            System.out.println("lel2222");
+            Toast.makeText(context, "recieved", Toast.LENGTH_SHORT).show();
+            String action = intent.getStringExtra("action");
+
+            if (action.equals("nothere")) {
+                Double latitude = intent.getDoubleExtra("latitude", 0.5);
+                Double longitude = intent.getDoubleExtra("longitude", 0.5);
+                System.out.println(latitude);
+                System.out.println(longitude);
+
+                SharedPreferences sharedPref = context.getSharedPreferences(
+                        "locations", Context.MODE_PRIVATE);
+
+                String locations = sharedPref.getString("location", "");
+                if (locations == "") {
+                    locations = latitude.toString() + "," + longitude.toString();
+                } else {
+                    locations = locations + "," + latitude.toString() + "," + longitude.toString();
+                }
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("location", locations);
+                editor.apply();
+
+            } else if (action.equals("ignore")) {
+                System.out.println("ignore");
+            }
+            //This is used to close the notification tray
+            Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            context.sendBroadcast(it);
+        }
+    }
+
+    boolean checkLocation(Location location) {
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                "locations", Context.MODE_PRIVATE);
+
+        String locations = sharedPref.getString("location", "");
+        String[] location_array = locations.split(",");
+        if (location_array.length > 1) {
+            for (int i = 0; i < location_array.length; ) {
+                Location locationA = new Location("point A");
+
+                locationA.setLatitude(location.getLatitude());
+                locationA.setLongitude(location.getLongitude());
+
+                Location locationB = new Location("point B");
+
+                locationB.setLatitude(Double.parseDouble(location_array[i]));
+                locationB.setLongitude(Double.parseDouble(location_array[i + 1]));
+
+                float distance = locationA.distanceTo(locationB);
+                if (distance < 0.001) {
+                    return false;
+                }
+                i = i + 2;
+            }
+        }
         return true;
     }
 
 
-    void doNotification(String titleText, String notificationText, Location location){
+    void doNotification(String titleText, String notificationText, Location location) {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-
         Intent intentAction = new Intent(context, ActionReceiver.class);
 
-        //This is optional if you have more than one buttons and want to differentiate between two
         intentAction.putExtra("action", "ignore");
         PendingIntent pIntentlogin;
         pIntentlogin = PendingIntent.getBroadcast(context, 1, intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -331,6 +412,7 @@ public class ForegroundService extends Service {
         intentAction2.putExtra("action", "nothere");
         intentAction2.putExtra("latitude", location.getLatitude());
         intentAction2.putExtra("longitude", location.getLongitude());
+
         PendingIntent pIntentlogin2;
         pIntentlogin2 = PendingIntent.getBroadcast(context, 2, intentAction2, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -341,23 +423,24 @@ public class ForegroundService extends Service {
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentIntent(pendingIntent)
                     .setChannelId(CHANNEL_ID)
-                    .addAction(R.drawable.ic_launcher_foreground, "ok",pIntentlogin)
-                    .addAction(R.drawable.ic_launcher_foreground, "not here",pIntentlogin2)
+                    .addAction(R.drawable.ic_launcher_foreground, "ok", pIntentlogin)
+                    .addAction(R.drawable.ic_launcher_foreground, "not here", pIntentlogin2)
                     //.setAutoCancel(true)
                     .setPriority(Notification.PRIORITY_MAX)
                     .build();
 
-            Log.d(TAG,"Really, really going to send the notification.");
+            Log.d(TAG, "Really, really going to send the notification.");
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
             notificationManager.notify(42, n);
 
-            Log.d(TAG,"Notification sent!");
+            Log.d(TAG, "Notification sent!");
         }
     }
 
+
     private void notify(final String titleText, final String notificationText) {
-        Log.d(TAG,"Going to send a notification.");
+        Log.d(TAG, "Going to send a notification.");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             System.out.println("no permissions");
             return;
@@ -375,7 +458,7 @@ public class ForegroundService extends Service {
                         }
                     }
                 });
-        }
+    }
 
 
     private void createNotificationChannel() {
