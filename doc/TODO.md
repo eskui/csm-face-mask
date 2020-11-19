@@ -21,9 +21,9 @@
 - [x] App that takes a photo and detects bounding box for the face (not needed)
 - [x] App that detects from picture if there is a face in the picture or not
 - [x] App that detects from picture of a face if the face has mask on or not
-- [ ] Test with another Android phone #Esa
-- [ ] App that takes a photo and detects if a face is present or not
-- [ ] Add buttons to notification
+- [x] Test with another Android phone #Esa
+- [x] App that takes a photo and detects if a face is present or not
+- [x] Add buttons to notification
 - [ ] Geolocation
 
 ## Software development
@@ -48,7 +48,7 @@
 - [x] Book time for 30/9/2020 meeting with Jukka
 - [x] Preparation for 7/10/2020 meeting
 - [x] Book time for 28/10/2020 meeting with Jukka
-- [ ] Preparation for 11/10/2020 meeting
+- [x] Preparation for 11/10/2020 meeting
 - [ ] Preparation for 25/11/2020 demo session
 
 ## Learning diary updates
@@ -59,5 +59,5 @@
 - [x] Update for 21/10/2020
 - [x] Update for 28/10/2020
 - [x] Update for 4/11/2020
-- [ ] Update for 11/11/2020
-- [ ] Update for 18/11/2020
+- [x] Update for 11/11/2020
+- [x] Update for 18/11/2020
