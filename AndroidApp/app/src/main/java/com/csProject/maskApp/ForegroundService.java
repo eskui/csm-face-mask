@@ -1,4 +1,4 @@
-package com.example.atry;
+package com.csProject.maskApp;
 //import com.example.atry.ActionReceiver;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -6,7 +6,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

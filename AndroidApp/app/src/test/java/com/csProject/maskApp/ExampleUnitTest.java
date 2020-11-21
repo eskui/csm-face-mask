@@ -1,4 +1,4 @@
-package com.example.atry;
+package com.csProject.maskApp;
 
 import org.junit.Test;
 

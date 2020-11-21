@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"
-package="com.example.atry">
+package="com.csProject.maskApp">
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -10,14 +10,14 @@ package="com.example.atry">
 <application
 
     android:allowBackup="true"
-    android:icon="@mipmap/ic_launcher"
+    android:icon="@mipmap/ic_launcher_round"
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/AppTheme">
-    <receiver android:name=".ForegroundService$ActionReceiver" android:enabled="true"/>
+    <receiver android:name="com.csProject.maskApp.ForegroundService$ActionReceiver" android:enabled="true"/>
     <service
-        android:name=".ForegroundService"
+        android:name="com.csProject.maskApp.ForegroundService"
         android:enabled="true"
         android:exported="true">
         <intent-filter>
@@ -25,7 +25,7 @@ package="com.example.atry">
             <action android:name="android.intent.action.ACTION_USER_UNLOCKED" />
         </intent-filter>
     </service>
-    <activity android:name=".MainActivity">
+    <activity android:name="com.csProject.maskApp.MainActivity">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
 
