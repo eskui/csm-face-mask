@@ -24,7 +24,7 @@
 - [x] Test with another Android phone #Esa
 - [x] App that takes a photo and detects if a face is present or not
 - [x] Add buttons to notification
-- [ ] Geolocation
+- [x] Geolocation
 
 ## Software development
 - [ ] Productize Android app code
