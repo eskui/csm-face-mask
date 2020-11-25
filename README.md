@@ -4,8 +4,6 @@ Project for Computer Science Project course by University of Helsinki, Autumn 20
 
 ### Forgot Your Face Mask App
 
-#### Android app
-
 - [Android app](AndroidApp/)
 - [Models & training code](model/)
 
