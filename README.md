@@ -10,5 +10,5 @@ Project for Computer Science Project course by University of Helsinki, Autumn 20
 #### Links
 
 - [TODO](doc/TODO.md)
-- [Kaggle dataset used as base](https://www.kaggle.com/alexandralorenzo/maskdetection)
+- [Kaggle dataset used as a base](https://www.kaggle.com/alexandralorenzo/maskdetection)
 
