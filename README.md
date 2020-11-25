@@ -6,15 +6,11 @@ Project for Computer Science Project course by University of Helsinki, Autumn 20
 
 #### Android app
 
-- [Android app skeleton](AndroidApp/)
+- [Android app](AndroidApp/)
+- [Models & training code](model/)
 
 #### Links
 
 - [TODO](doc/TODO.md)
-- [Training on Puhti](csc_puhti_guide.txt)
-
-#### Meetings with Jukka
-
-- Wed 30/9/2020 9:30
-- Wed 28/10/2020 9:45
+- [Kaggle dataset used as base](https://www.kaggle.com/alexandralorenzo/maskdetection)
 
